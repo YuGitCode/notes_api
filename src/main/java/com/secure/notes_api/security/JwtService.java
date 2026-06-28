@@ -1,5 +1,7 @@
 package com.secure.notes_api.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,5 +34,27 @@ public class JwtService {
                 .expiration(expiry)       // "exp" — when it expires
                 .signWith(signingKey)     // sign with the secret → the signature
                 .compact();               // build the final header.payload.signature string
+    }
+
+    public String extractUsername(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            parseClaims(token);   // if this doesn't throw, the token is genuine and unexpired
+            return true;
+        } catch (JwtException e) {
+            // signature invalid, expired, malformed — any failure means "not valid"
+            return false;
+        }
+    }
+
+    private  Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(signingKey)   // check the signature using OUR secret key
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();            // the claims (subject, iat, exp)
     }
 }

@@ -3,6 +3,10 @@ package com.secure.notes_api.user;
 import com.secure.notes_api.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.secure.notes_api.security.UserPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 @Service
 public class UserService {
@@ -37,5 +41,11 @@ public class UserService {
         }
 
         return jwtService.generateToken(user.getUsername());
+    }
+
+    public User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        return principal.getUser();
     }
 }
